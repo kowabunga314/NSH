@@ -6,12 +6,13 @@ class NeoWs():
     endpoints = {
         'browse': '/neo/rest/v1/neo/browse/',
         'by_date': '/neo/rest/v1/feed?start_date={}&end_date={}/',
-        'detail': '/neo/rest/v1/neo/{}/'
+        'detail': '/neo/rest/v1/neo/{}'
     }
 
     @staticmethod
     def build_url(endpoint):
-        return f'{NEOWS_HOST}{endpoint}?api_key={NASA_API_KEY}'
+        param_char = '&' if '?' in endpoint else '?'
+        return f'{NEOWS_HOST}{endpoint}{param_char}api_key={NASA_API_KEY}'
 
     def browse(self):
         url = self.build_url(self.endpoints.get('browse'))
