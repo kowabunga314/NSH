@@ -38,7 +38,7 @@ class ApproachSerializer(serializers.HyperlinkedModelSerializer):
         params = {
             'body_id': data['id'],
             'time': data['close_approach_data'][0]['close_approach_date'],
-            'reative_velocity': data['close_approach_data'][0]['relative_velocity']['kilometers_per_second'],
+            'relative_velocity': data['close_approach_data'][0]['relative_velocity']['kilometers_per_second'],
             'miss_distance': data['close_approach_data'][0]['miss_distance']['kilometers'],
         }
         return Approach(**params)

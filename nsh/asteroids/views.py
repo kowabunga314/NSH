@@ -1,9 +1,14 @@
+from requests import api
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from asteroids.serializers import ApproachSerializer
 from clients.neows import NeoWs
 from django.shortcuts import render
 
+
 # Create your views here.
-def get_closest_approach():
+@api_view(['GET'])
+def get_closest_approach(request):
     n = NeoWs()
     this_week = n.get_approaches_by_date()
     data = this_week.get('data')
@@ -24,4 +29,57 @@ def get_closest_approach():
     # Return closest approach
     ca_model = ApproachSerializer().create(data=data['near_earth_objects'][closest_approach['day']][closest_approach['pos']])
 
-    return ca_model
+    return Response(data=ca_model.__dict__())
+
+
+@api_view(['GET'])
+def get_largest_asteroid(request):
+    n = NeoWs()
+    this_week = n.get_approaches_by_date()
+    data = this_week.get('data')
+
+    # Initialize closest approach tracker
+    largest_encounter = dict(day=None, size=None, pos=-1)
+
+    # Data is grouped by day, iterate over each day
+    for day in data['near_earth_objects']:
+        # Day contains list of approaches, iterate over each approach
+        for i, approach in enumerate(data['near_earth_objects'][day]):
+            # Get distance of this approach
+            size = (
+                approach['estimated_diameter']['kilometers']['estimated_diameter_min']
+                + approach['estimated_diameter']['kilometers']['estimated_diameter_max']
+            ) / 2
+            # Compare this approach to current closest approach
+            if largest_encounter['size'] is None or size > largest_encounter['size']:
+                largest_encounter = dict(day=day, size=size, pos=i)
+
+    # Return closest approach
+    ca_model = ApproachSerializer().create(data=data['near_earth_objects'][largest_encounter['day']][largest_encounter['pos']])
+
+    return Response(data=ca_model.__dict__())
+
+
+@api_view(['GET'])
+def get_fastest_asteroid(request):
+    n = NeoWs()
+    this_week = n.get_approaches_by_date()
+    data = this_week.get('data')
+
+    # Initialize closest approach tracker
+    fastest_encounter = dict(day=None, r_vel=None, pos=-1)
+
+    # Data is grouped by day, iterate over each day
+    for day in data['near_earth_objects']:
+        # Day contains list of approaches, iterate over each approach
+        for i, approach in enumerate(data['near_earth_objects'][day]):
+            # Get distance of this approach
+            r_vel = approach['close_approach_data'][0]['relative_velocity']['kilometers_per_second']
+            # Compare this approach to current closest approach
+            if fastest_encounter['r_vel'] is None or r_vel > fastest_encounter['r_vel']:
+                fastest_encounter = dict(day=day, r_vel=r_vel, pos=i)
+
+    # Return closest approach
+    ca_model = ApproachSerializer().create(data=data['near_earth_objects'][fastest_encounter['day']][fastest_encounter['pos']])
+
+    return Response(data=ca_model.__dict__())

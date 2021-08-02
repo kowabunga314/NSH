@@ -20,9 +20,17 @@ class Asteroid(models.Model):
 class Approach(models.Model):
     body_id = models.CharField(max_length=16)
     time = models.DateTimeField()
-    reative_velocity = models.FloatField()
+    relative_velocity = models.FloatField()
     miss_distance = models.FloatField() # km
 
     def __str__(self):
         return f'Asteroid {self.body_id}: {self.miss_distance} km at {self.time}'
+
+    def __dict__(self):
+        return {
+            'body_id': self.body_id,
+            'time': self.time,
+            'relative_velocity': self.relative_velocity,
+            'miss_distance': self.miss_distance
+        }
 
