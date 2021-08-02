@@ -1,4 +1,5 @@
-from nsh.nsh.settings import NASA_API_KEY, NEOWS_HOST
+import json
+from nsh.settings import NASA_API_KEY, NEOWS_HOST
 from requests import get, exceptions
 
 
@@ -21,25 +22,40 @@ class NeoWs():
             response = get(url)
         except exceptions.RequestException as e:
             print(e)
+
+        try:
+            data = json.loads(response.text)
+        except:
+            raise()
         
-        return response
+        return {'status_code': response.status_code, 'data': data}
 
     def get_approaches_by_date(self, start_date='2021-08-01', end_date='2021-08-07'):
         url = self.build_url(self.endpoints.get('by_date').format(start_date, end_date))
 
         try:
             response = get(url)
-        except Exception as e:
+        except exceptions.RequestException as e:
             print(e)
+
+        try:
+            data = json.loads(response.text)
+        except:
+            raise()
         
-        return response
+        return {'status_code': response.status_code, 'data': data}
 
     def get_asteroid_detail(self, asteroid_id='2250680'):
         url = self.build_url(self.endpoints.get('detail').format(asteroid_id))
 
         try:
             response = get(url)
-        except Exception as e:
+        except exceptions.RequestException as e:
             print(e)
+
+        try:
+            data = json.loads(response.text)
+        except:
+            raise()
         
-        return response
+        return {'status_code': response.status_code, 'data': data}
