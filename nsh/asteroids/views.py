@@ -75,7 +75,7 @@ class NeoWsAPI():
                     fastest_encounter = dict(day=day, r_vel=r_vel, pos=i)
 
         # Return approach
-        data['near_earth_objects'][fastest_encounter['day']][fastest_encounter['pos']]
+        return data['near_earth_objects'][fastest_encounter['day']][fastest_encounter['pos']]
 
 
 
@@ -127,16 +127,14 @@ def get_notable_encounters(request):
     # Initialize NeoWs API
     na = NeoWsAPI()
     # Get data from NeoWs API
-    closest_approach_data = na.get_closest_approach()
-    largest_approach_data = na.get_largest_approach()
-    fastest_approach_data = na.get_fastest_approach()
+    closest_approach_data = ApproachSerializer().create(na.get_closest_approach())
+    largest_approach_data = ApproachSerializer().create(na.get_largest_approach())
+    fastest_approach_data = ApproachSerializer().create(na.get_fastest_approach())
     data = {
-        'closest_approach': closest_approach_data,
-        'largest_approach': largest_approach_data,
-        'fastest_approach': fastest_approach_data,
+        'closest_approach': closest_approach_data.__dict__(),
+        'largest_approach': largest_approach_data.__dict__(),
+        'fastest_approach': fastest_approach_data.__dict__(),
     }
 
     # Return closest approach
-    ca_model = ApproachSerializer().create(data=data)
-
-    return Response(data=ca_model.__dict__())
+    return Response(data=data)
