@@ -1,9 +1,11 @@
+from datetime import datetime, timedelta
 import json
 from nsh.settings import NASA_API_KEY, NEOWS_HOST
 from requests import get, exceptions
 
 
 class NeoWs():
+    date_format = '%Y-%m-%d'
     endpoints = {
         'browse': '/neo/rest/v1/neo/browse/',
         'by_date': '/neo/rest/v1/feed?start_date={}&end_date={}/',
@@ -14,6 +16,15 @@ class NeoWs():
     def build_url(endpoint):
         param_char = '&' if '?' in endpoint else '?'
         return f'{NEOWS_HOST}{endpoint}{param_char}api_key={NASA_API_KEY}'
+
+    def parse_date(self, date):
+        if type(date) == str:
+            try:
+                return datetime.strptime(date, self.date_format)
+            except:
+                raise TypeError('Dates should be provided in the format "MM-DD-YYYY"')
+        else:
+            raise TypeError('Dates should be provided in the format "MM-DD-YYYY"')
 
     def browse(self):
         url = self.build_url(self.endpoints.get('browse'))
@@ -30,7 +41,11 @@ class NeoWs():
         
         return {'status_code': response.status_code, 'data': data}
 
-    def get_approaches_by_date(self, start_date='2021-08-01', end_date='2021-08-07'):
+    def get_approaches_by_date(self, start_date=None, end_date=None):
+        # Set default dates
+        if start_date is None: start_date = datetime.strftime(datetime.now(), self.date_format)
+        if end_date is None: end_date = datetime.strftime(datetime.now() + timedelta(days=7), self.date_format)
+
         url = self.build_url(self.endpoints.get('by_date').format(start_date, end_date))
 
         try:
